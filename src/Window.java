@@ -1,13 +1,16 @@
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 
 import javax.swing.JFrame;
 
 public class Window extends JFrame implements Runnable {
 
-	Graphics2D g2;
-	KL keyListener = new KL();
-	Rect playerOne, ai, ball;
+	public Graphics2D g2;
+	public KL keyListener = new KL();
+	public Rect playerOne, ai, ball;
+	public PlayerController playerController;
 
 	// constructor method for the game window
 	public Window() {
@@ -17,6 +20,8 @@ public class Window extends JFrame implements Runnable {
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.addKeyListener(keyListener);
+		Constants.TOOLBAR_HEIGHT = this.getInsets().top;
+		
 		g2 = (Graphics2D) this.getGraphics();
 
 		// define game graphics
@@ -27,6 +32,7 @@ public class Window extends JFrame implements Runnable {
 				Constants.PADDLE_HEIGHT,
 				Constants.PADDLE_COLOR
 				);
+		playerController = new PlayerController(playerOne, keyListener);
 		ai = new Rect(
 				Constants.SCREEN_WIDTH - Constants.PADDLE_WIDTH - Constants.HZ_PADDING,
 				40,
@@ -44,8 +50,21 @@ public class Window extends JFrame implements Runnable {
 	}
 
 	public void update(double dt) {
+		Image dbImage = createImage(getWidth(), getHeight());
+		Graphics dbg = dbImage.getGraphics();
+		this.draw(dbg);
+		g2.drawImage(dbImage, 0, 0, this);
+
 		// print current framerate to the console
 //		System.out.println(1 / dt + "fps");
+
+		
+		playerController.update(dt);
+
+	}
+	
+	public void draw(Graphics g) {
+		Graphics2D g2 = (Graphics2D)g;
 
 		// game window settings
 		g2.setColor(Color.BLACK);
@@ -55,6 +74,7 @@ public class Window extends JFrame implements Runnable {
 		playerOne.draw(g2);
 		ai.draw(g2);
 		ball.draw(g2);
+
 	}
 
 	// game loop
@@ -69,11 +89,12 @@ public class Window extends JFrame implements Runnable {
 			update(deltaTime);
 
 			// limit frame rate to 60 fps
-			try {
-				Thread.sleep(15);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(15);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+
 		}
 	}
 
